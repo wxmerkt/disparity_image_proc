@@ -72,7 +72,7 @@ class DepthImageNodelet : public nodelet::Nodelet
 
   // Publications
   boost::mutex connect_mutex_;
-  ros::Publisher pub_depth_image_;
+  image_transport::Publisher pub_depth_image_;
 
   // Processing state (note: only safe because we're single-threaded!)
   image_geometry::StereoCameraModel model_;
@@ -118,10 +118,10 @@ void DepthImageNodelet::onInit()
   }
 
   // Monitor whether anyone is subscribed to the output
-  ros::SubscriberStatusCallback connect_cb = boost::bind(&DepthImageNodelet::connectCb, this);
+  image_transport::SubscriberStatusCallback connect_cb = boost::bind(&DepthImageNodelet::connectCb, this);
   // Make sure we don't enter connectCb() between advertising and assigning to pub_points2_
   boost::lock_guard<boost::mutex> lock(connect_mutex_);
-  pub_depth_image_  = nh.advertise<sensor_msgs::Image>("depth_image",  1, connect_cb, connect_cb);
+  pub_depth_image_  = it_->advertise("depth_image", 1, connect_cb, connect_cb);
 }
 
 // Handles (un)subscribing when clients (un)subscribe
